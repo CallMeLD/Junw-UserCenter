@@ -1,6 +1,8 @@
 -- 创建数据库
 create schema junw collate utf8mb4_general_ci;
 
+use junw;
+
 -- 创建用户表
 create table user
 (
