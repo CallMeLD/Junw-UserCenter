@@ -1,4 +1,4 @@
-package my.junw.usercenter;
+package my.junw.usercenter.mp;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
