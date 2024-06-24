@@ -10,6 +10,9 @@ import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+/**
+ * mp-plus 代码生成器
+ */
 public class CodeGenerator {
 
     private static String moduleName = "";    //模块名称  spaceTime

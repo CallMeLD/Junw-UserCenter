@@ -33,5 +33,42 @@ public class UserEOServiceTest {
     }
 
 
+    @Test
+    void userRegister() {
+        // 入参存在空值
+        String userAccount = "junw";
+        String password = "12345678";
+        String checkPassword = "";
+        long rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertEquals(-1,rs);
+        // 账号长度 < 4
+        userAccount = "jw";
+        password = "12345678";
+        checkPassword = "12345678";
+        rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertEquals(-1,rs);
+        // 账号包含特殊字符
+        userAccount = "ju!nw";
+        rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertEquals(-1,rs);
+        // 密码与校验密码不一致
+        userAccount = "junw";
+        password = "12345678";
+        checkPassword = "1234!5678";
+        rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertEquals(-1,rs);
+        // 账号重复
+        userAccount = "admin1";
+        checkPassword = "12345678";
+        rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertEquals(-1,rs);
 
+        // 正常
+        userAccount = "junw";
+        password = "12345678";
+        checkPassword = "12345678";
+        rs = userService.userRegister(userAccount,password,checkPassword);
+        Assertions.assertTrue(rs > 0);
+
+    }
 }
