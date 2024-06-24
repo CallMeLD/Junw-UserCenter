@@ -1,7 +1,10 @@
 package my.junw.usercenter.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import my.junw.usercenter.entity.UserEO;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.net.http.HttpRequest;
 
 /**
  * <p>
@@ -13,6 +16,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserEOService extends IService<UserEO> {
 
+
+
     /**
      * 用户注册
      * @param userAccount
@@ -22,6 +27,12 @@ public interface IUserEOService extends IService<UserEO> {
      */
     long userRegister(String userAccount,String userPassword,String checkPassword);
 
-
+    /**
+     * 登录-返回用户信息
+     * @param userAccount
+     * @param userPassword
+     * @return
+     */
+    UserEO doLogin(String userAccount, String userPassword, HttpServletRequest request);
 
 }

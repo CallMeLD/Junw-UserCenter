@@ -1,9 +1,7 @@
 package my.junw.usercenter.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Getter;
@@ -92,8 +90,15 @@ public class UserEO implements Serializable {
     /**
      * 是否删除
      */
+    @TableLogic
     @TableField("isDelete")
     private Integer isDelete;
+
+    /**
+     * 用户角色（0-普通用户；1-管理员）
+     */
+    @TableField("userRole")
+    private Integer userRole;
 
     public static final String ID = "id";
 
@@ -118,4 +123,6 @@ public class UserEO implements Serializable {
     public static final String UPDATETIME = "updateTime";
 
     public static final String ISDELETE = "isDelete";
+
+    public static final String USERROLE = "userRole";
 }
