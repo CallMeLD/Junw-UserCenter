@@ -3,8 +3,11 @@ package my.junw.usercenter.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import my.junw.usercenter.contant.UserConstant;
+import my.junw.usercenter.common.BaseResponse;
+import my.junw.usercenter.common.ErrorCode;
+import my.junw.usercenter.common.ResultUtils;
 import my.junw.usercenter.entity.UserEO;
+import my.junw.usercenter.exception.BusinessException;
 import my.junw.usercenter.service.IUserEOService;
 import my.junw.usercenter.util.UserToUser;
 import my.junw.usercenter.vo.UserLoginRequst;
@@ -12,9 +15,11 @@ import my.junw.usercenter.vo.UserRegisterRequst;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static my.junw.usercenter.contant.UserConstant.ADMIN_ROLE;
+import static my.junw.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * <p>
@@ -37,12 +42,18 @@ public class UserEOController {
      * @return
      */
     @PostMapping("/register")
-    public Long userRegister(@RequestBody UserRegisterRequst urr){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequst urr){
         // 入参校验，无关业务逻辑
         if(urr == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        return service.userRegister(urr.getUserAccount(), urr.getUserPassword(), urr.getCheckPassword());
+        String userAccount = urr.getUserAccount();
+        String userPassword = urr.getUserPassword();
+        String checkPassword = urr.getCheckPassword();
+        if(StringUtils.isBlank(userAccount) || StringUtils.isBlank(userPassword) || StringUtils.isBlank(checkPassword)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return ResultUtils.success(service.userRegister(userAccount, userPassword, checkPassword));
     }
 
     /**
@@ -52,13 +63,51 @@ public class UserEOController {
      * @return
      */
     @PostMapping("/login")
-    public UserEO userLogin(@RequestBody UserLoginRequst ulr, HttpServletRequest hsr){
+    public BaseResponse<UserEO> userLogin(@RequestBody UserLoginRequst ulr, HttpServletRequest hsr){
         // 入参校验，无关业务逻辑
         if(ulr == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        return service.doLogin(ulr.getUserAccount(), ulr.getUserPassword(),hsr);
+        String userAccount = ulr.getUserAccount();
+        String userPassword = ulr.getUserPassword();
+        if(StringUtils.isBlank(userAccount) || StringUtils.isBlank(userPassword)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return ResultUtils.success(service.doLogin(userAccount, userPassword,hsr));
     }
+
+    /**
+     * 用户注销
+     * @param hsr
+     * @return
+     */
+    @PostMapping("/logout")
+    public BaseResponse<Integer> userLogout(HttpServletRequest hsr){
+        if(hsr == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        int result = service.userLogout(hsr);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 获取当前登录用户
+     * @param hsr
+     * @return
+     */
+    @GetMapping("/current")
+    public BaseResponse<UserEO> getCurrentUser(HttpServletRequest hsr){
+        UserEO cuser = (UserEO) hsr.getSession().getAttribute(USER_LOGIN_STATE);
+        if(cuser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        long userId = cuser.getId();
+        // 数据库 验证用户是否合法
+        UserEO dbuser = service.getById(userId);
+        UserEO safeUser = UserToUser.INSTANCE.toSafeUser(dbuser);
+        return  ResultUtils.success(safeUser);
+    }
+
 
     /**
      * 根据用户名查询用户
@@ -66,10 +115,10 @@ public class UserEOController {
      * @return
      */
     @GetMapping("/search")
-    public List<UserEO> userSearch(String userName,HttpServletRequest hsr){
+    public BaseResponse<List<UserEO>> userSearch(String userName,HttpServletRequest hsr){
         // 仅管理员可查询
         if(!isAdmin(hsr)){
-            return new ArrayList<>();
+            throw new BusinessException(ErrorCode.NO_AUTH,"仅限管理员可操作");
         }
         // 查询
         QueryWrapper<UserEO> queryWrapper = new QueryWrapper<>();
@@ -77,8 +126,9 @@ public class UserEOController {
             queryWrapper.like(UserEO.USERNAME,userName);
         }
         List<UserEO> rlist = service.list(queryWrapper);
+        List<UserEO> safelist = rlist.stream().map(user -> UserToUser.INSTANCE.toSafeUser(user)).collect(Collectors.toList());
         // 脱敏
-        return rlist.stream().map(user -> UserToUser.INSTANCE.toSafeUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(safelist);
     }
 
     /**
@@ -87,23 +137,23 @@ public class UserEOController {
      * @return
      */
     @GetMapping("/delete")
-    public boolean deleteUser(long id,HttpServletRequest hsr){
+    public BaseResponse<Boolean> deleteUser(long id, HttpServletRequest hsr){
         // 仅管理员可查询
         if(!isAdmin(hsr)){
-            return false;
+            throw new BusinessException(ErrorCode.NO_AUTH,"仅限管理员可操作");
         }
         if(id <= 0){
-            return false;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"不在数据范围内");
         }
-        return service.removeById(id);
+        return ResultUtils.success(service.removeById(id));
     }
 
     // 判定当前登录用户是否为管理员
     private boolean isAdmin(HttpServletRequest hsr){
         // 鉴权
-        UserEO loginUser = (UserEO)hsr.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        UserEO loginUser = (UserEO)hsr.getSession().getAttribute(USER_LOGIN_STATE);
         // 仅管理员可查询
-        if(loginUser != null && loginUser.getUserRole() != null &&  UserConstant.ADMIN_ROLE == loginUser.getUserRole()){
+        if(loginUser != null && loginUser.getUserRole() != null &&  ADMIN_ROLE == loginUser.getUserRole()){
             return true;
         }
         return false;

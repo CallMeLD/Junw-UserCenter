@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/junw?characterEncoding=utf-8&&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC
+    username: root
+    password: 123456
+  # 登录过期时间 s
+  session:
+    timeout: 86400
+
+server:
+  address: 0.0.0.0

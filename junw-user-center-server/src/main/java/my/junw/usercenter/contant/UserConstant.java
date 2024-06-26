@@ -1,5 +1,8 @@
 package my.junw.usercenter.contant;
 
+/**
+ * 常量类
+ */
 public interface UserConstant {
 
     /**

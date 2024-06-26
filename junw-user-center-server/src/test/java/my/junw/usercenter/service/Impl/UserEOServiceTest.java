@@ -16,6 +16,9 @@ public class UserEOServiceTest {
     @Resource
     private IUserEOService userService;
 
+    /**
+     * 测试添加用户
+     */
     @Test
     public void testAddUser(){
         UserEO user = new UserEO();
@@ -32,7 +35,9 @@ public class UserEOServiceTest {
         Assertions.assertTrue(result);
     }
 
-
+    /**
+     * 测试注册用户
+     */
     @Test
     void userRegister() {
         // 入参存在空值
@@ -71,4 +76,8 @@ public class UserEOServiceTest {
         Assertions.assertTrue(rs > 0);
 
     }
+
+
+
+
 }

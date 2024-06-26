@@ -35,4 +35,13 @@ public interface IUserEOService extends IService<UserEO> {
      */
     UserEO doLogin(String userAccount, String userPassword, HttpServletRequest request);
 
+
+    /**
+     * 用户注销
+     * @param request
+     * @return
+     */
+    int userLogout(HttpServletRequest request);
+
+
 }
