@@ -12,7 +12,7 @@ export default [
     path: '/admin',
     name: '管理页',
     icon: 'crown',
-    access: 'canAdmin',
+    access: 'canAdmin',// 当前版本权限存在问题？试了新下载的脚手架，simple版的admin账号登录，也还是一样；留待后续解决
     component: './Admin',
     routes: [
       { path: '/admin/user-manage', name: '用户管理', icon: 'smile', component: './Admin/UserManage'},
